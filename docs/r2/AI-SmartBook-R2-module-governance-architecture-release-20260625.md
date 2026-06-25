@@ -32,6 +32,21 @@ Source of truth: main
 
 每支功能 PR 都要能在後台 R2 模組整合中心反映狀態：綠、黃、紅、灰。
 
+## 圖形化流程
+
+```text
+main
+  -> docs governance
+  -> baseline validation
+  -> schema / repository foundation
+  -> book-content-pipeline
+  -> pdf-reader-ai-core
+  -> question-bank-solve
+  -> admin-files-settings
+  -> smart-ai-backend
+  -> acceptance / rollback drill
+```
+
 ## 下一步
 
 合併本 PR 後，先開 feat/r2-baseline-validation-20260625。
