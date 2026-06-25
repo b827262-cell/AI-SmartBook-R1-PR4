@@ -47,6 +47,15 @@ main
   -> acceptance / rollback drill
 ```
 
+```text
+R2 module center
+  |- pdf-reader-ai-core
+  |- book-content-pipeline
+  |- admin-files-settings
+  |- smart-ai-backend
+  |- question-bank-solve
+```
+
 ## 下一步
 
 合併本 PR 後，先開 feat/r2-baseline-validation-20260625。
