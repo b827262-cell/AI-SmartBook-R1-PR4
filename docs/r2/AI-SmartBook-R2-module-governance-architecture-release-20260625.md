@@ -11,11 +11,13 @@ Source of truth: main
 
 ## 五大模組
 
-- pdf-reader-ai-core
-- book-content-pipeline
-- admin-files-settings
-- smart-ai-backend
-- question-bank-solve
+| 模組 | 範圍 |
+| --- | --- |
+| pdf-reader-ai-core | PDF reader、頁碼、章節、截圖問答、筆記導覽 |
+| book-content-pipeline | 書籍上傳、PDF parse、TOC、JSON index、內容切分 |
+| admin-files-settings | Files、Settings、模型設定、R2 整合中心 |
+| smart-ai-backend | provider runtime、prompt、知識服務、AI jobs |
+| question-bank-solve | 題庫、我的題庫、一鍵解題、Smart Solve |
 
 ## 整合順序
 
