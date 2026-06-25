@@ -58,6 +58,10 @@ R2 module center
   |- question-bank-solve
 ```
 
+## PR 規則
+
+每支功能 PR 必須包含：Scope、Module、Files changed、Validation、R2 module center status、Rollback、Not included。
+
 ## 下一步
 
 合併本 PR 後，先開 feat/r2-baseline-validation-20260625。
