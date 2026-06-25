@@ -10,3 +10,5 @@ export * from "./aiJob.schema";
 export * from "./qaLog.schema";
 export * from "./sync.schema";
 export * from "./appearance.schema";
+export * from "./r2Integration.schema";
+
