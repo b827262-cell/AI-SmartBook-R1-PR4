@@ -1,0 +1,286 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/b827262-cell/AI-SmartBook-R1-PR4/docs/ops/AI-SmartBook-R1-PR4-agent-workflow.schema.json",
+  "title": "AI-SmartBook-R1-PR4 Agent Workflow Guardrails",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "architecture",
+    "database",
+    "referenceProjectPolicy",
+    "phases",
+    "prohibitedFirstPhaseChanges",
+    "mergeGuardrails",
+    "acceptanceCriteria"
+  ],
+  "properties": {
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceOfTruth", "targetProject", "mustRemain"],
+      "properties": {
+        "sourceOfTruth": {
+          "const": "AI-SmartBook-R1"
+        },
+        "targetProject": {
+          "const": "AI-SmartBook-R1-PR4"
+        },
+        "mustRemain": {
+          "const": "AI-SmartBook-R1 based architecture"
+        }
+      }
+    },
+    "database": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["baseline", "forbiddenAssumptions", "firstPhaseSchemaPolicy"],
+      "properties": {
+        "baseline": {
+          "const": "SQLite"
+        },
+        "forbiddenAssumptions": {
+          "type": "array",
+          "items": {
+            "enum": ["TiDB", "MySQL", "MySQL-compatible runtime requirement"]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "firstPhaseSchemaPolicy": {
+          "const": "do not change drizzle/schema.ts or migration files"
+        }
+      }
+    },
+    "referenceProjectPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["referenceProject", "allowedUse", "forbiddenUse"],
+      "properties": {
+        "referenceProject": {
+          "const": "ai_tutor_helper_20260704_TUFA16"
+        },
+        "allowedUse": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "SQLite-compatible backend fallback reference",
+              "optional-table missing fallback reference",
+              "category display normalization reference",
+              "category icon mojibake repair reference",
+              "read-only diff verification reference"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "forbiddenUse": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "replace PR4 architecture",
+              "port TiDB/MySQL assumptions",
+              "port OAuth as first-phase architecture",
+              "broad-copy source files",
+              "change docker-compose architecture"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "phases": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["P0", "P1", "P2", "P3"],
+      "properties": {
+        "P0": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "goal", "allowedFiles", "mustNotChange"],
+          "properties": {
+            "name": { "const": "backend SQLite-compatible fallback" },
+            "goal": { "const": "avoid runtime 500 errors when optional tables are missing" },
+            "allowedFiles": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "server/routers/smartBookRouter.ts",
+                  "server/routers/smartBookLearningRouter.ts",
+                  "server/routers/featureTogglesRouter.ts"
+                ]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "mustNotChange": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "client files",
+                  "drizzle/schema.ts",
+                  "migration files",
+                  "OAuth files",
+                  "docker-compose.yml",
+                  "API procedure names",
+                  "API input/output shapes"
+                ]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        },
+        "P1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "goal", "allowedFiles", "mustNotChange"],
+          "properties": {
+            "name": { "const": "SmartBook category display repair" },
+            "goal": { "const": "fix category icon mojibake and normalize display names" },
+            "allowedFiles": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "client/src/lib/smartBookCategoryDisplay.ts",
+                  "client/src/pages/SmartBooks.tsx",
+                  "client/src/pages/SmartBooksBookTabs.tsx",
+                  "client/src/pages/AdminSmartBooks.tsx"
+                ]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            },
+            "mustNotChange": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "server files",
+                  "drizzle/schema.ts",
+                  "migration files",
+                  "OAuth files",
+                  "docker-compose.yml",
+                  "PDF reader behavior",
+                  "Ask AI behavior",
+                  "learning progress logic"
+                ]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        },
+        "P2": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "mode", "allowedOutput"],
+          "properties": {
+            "name": { "const": "read-only verification" },
+            "mode": { "const": "read-only" },
+            "allowedOutput": {
+              "type": "array",
+              "items": {
+                "enum": [
+                  "docs/verification markdown report",
+                  "verification-only shell commands or scripts"
+                ]
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        },
+        "P3": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "requiresExplicitApproval"],
+          "properties": {
+            "name": { "const": "OAuth and formal DB migration" },
+            "requiresExplicitApproval": { "const": true }
+          }
+        }
+      }
+    },
+    "prohibitedFirstPhaseChanges": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "Google OAuth architecture port",
+          "TiDB/MySQL runtime requirement",
+          "SQLite runtime replacement",
+          "drizzle/schema.ts modification",
+          "migration modification",
+          "docker-compose architecture modification",
+          "PDF reader refactor",
+          "Ask AI core flow refactor",
+          "lesson-point completion refactor",
+          "secret or .env commit"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "mergeGuardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredChecks", "forbiddenChangedPathPatterns"],
+      "properties": {
+        "requiredChecks": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "git status --short is clean",
+              "drizzle/schema.ts has no diff",
+              "no migration files changed",
+              "no OAuth files changed",
+              "no docker-compose changes",
+              "only approved files changed"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "forbiddenChangedPathPatterns": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "^drizzle/schema.ts$",
+              "^drizzle/migrations/",
+              "^migrations/",
+              "^docker-compose.yml$",
+              "^server/_core/env.ts$",
+              "^server/_core/oauth.ts$",
+              "^server/_core/googleOAuth.ts$",
+              "^\\.env",
+              "secret files"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "AI-SmartBook-R1 remains the main architecture",
+          "SQLite remains the database baseline",
+          "No TiDB/MySQL-specific architecture introduced",
+          "Schema and migrations unchanged",
+          "OAuth not mixed into first phase",
+          "Backend optional-table fallback is SQLite-compatible",
+          "Category mojibake repaired",
+          "Book list opens",
+          "Single-book page opens",
+          "PDF reader loads",
+          "Mobile PDF layout remains functional",
+          "Agent reports written in Traditional Chinese",
+          "No secrets committed"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  }
+}
