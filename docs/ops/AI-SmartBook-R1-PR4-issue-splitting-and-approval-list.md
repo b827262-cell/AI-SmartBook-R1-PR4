@@ -381,3 +381,120 @@ Every agent must finish in Traditional Chinese:
   - blocker: <阻礙項目，沒有則寫「無」>
   - permission-halt: <權限或需人工確認項目，沒有則寫「無」>
 ```
+
+---
+
+## 12. Group B Requested Matrix (Traditional Chinese)
+
+日期：2026-07-05
+作者：Hermes Agent
+模式：issue splitting / approval routing，非實作
+
+本段是依使用者指定格式補入的 Group B 摘要，供後續派工與人工核准直接引用。
+
+## Group B：只做分析，不施工
+
+| ID | 任務 | Agent | 原因 |
+| --- | --- | --- | --- |
+| B1 | PDF Annotations Persistence Portability Analysis | Hermes GPT-5.4 | PDF notes/highlights 有 MySQL-oriented 風險 |
+| B2 | Lesson Points Persistence Portability Analysis | Hermes GPT-5.4 | 知識點完成流程需先審查 |
+| B3 | Credit Transactions / Credits Tab Portability Analysis | Hermes GPT-5.4 | credits tab 與 optional table fallback 需分開分析 |
+
+## Group B 工作邊界
+
+### B1 PDF Annotations Persistence Portability Analysis
+
+分析範圍：
+- `server/routers/pdfHighlightsRouter.ts`
+- `server/routers/pdfImageNotesRouter.ts`
+- `drizzle/schema.ts`
+- SmartBook notebook / splitNoteMode / PdfViewer 對應前端
+
+分析重點：
+1. 是否依賴 MySQL DDL / `AUTO_INCREMENT` / `INFORMATION_SCHEMA`
+2. 是否有 runtime auto-create table / auto-alter column 行為
+3. 是否存在 SQLite baseline 不相容的欄位型別或 migration 假設
+4. 前端 notebook 與 image-notes 是否能在不改 schema 的前提下 degrade gracefully
+
+輸出物：
+- 風險分級
+- SQLite-safe / not-safe 邊界
+- 是否值得另開 implementation issue
+
+不做：
+- 不改 schema
+- 不補 migration
+- 不改 router 行為
+- 不改前端 notebook/persistence 邏輯
+
+### B2 Lesson Points Persistence Portability Analysis
+
+分析範圍：
+- `server/routers/lessonPointsRouter.ts`
+- `server/routers/smartBookRouter.ts` 中 lesson-point / guided learning 關聯路徑
+- `client/src/pages/SmartBooksChapterLearning.tsx`
+
+分析重點：
+1. 知識點完成、腳本回放、進度寫回涉及哪些表
+2. lesson points 完成狀態是否綁定既有 MySQL schema 假設
+3. 若 SQLite baseline 缺表或缺欄位，哪些流程會炸裂、哪些可 fallback
+4. 目前「已存在功能」與「可安全移植」之間的差距
+
+輸出物：
+- lesson points persistence 依賴圖
+- 需要人工核准的風險點
+- 是否可拆成低風險 read-only / fallback-only 後續 issue
+
+不做：
+- 不改知識點完成流程
+- 不改 sendMessage / guided learning 主流程
+- 不新增 lesson tables / migration
+
+### B3 Credit Transactions / Credits Tab Portability Analysis
+
+分析範圍：
+- `server/routers/smartBookLearningRouter.ts`
+- `server/routers/points.ts`
+- `server/routers/featureTogglesRouter.ts`
+- `drizzle/schema.ts` 中 `credit_transactions` 與相關依賴
+- `client/src/pages/SmartBooksBookDetail.tsx` credits tab
+
+分析重點：
+1. credits tab UI 查哪些 query
+2. `credit_transactions` 缺表時，哪些功能只是顯示失敗，哪些會阻斷主流程
+3. optional table fallback 與 accounting/credits 正式資料一致性是否能分離
+4. 哪些可以做「安全 fallback」，哪些必須先補表後才可施工
+
+輸出物：
+- credits tab portability 風險表
+- fallback-safe / schema-required 清單
+- 是否應拆成兩張 issue：UI fallback 與 schema remediation
+
+不做：
+- 不調整 credit 規則
+- 不補 `credit_transactions` 表
+- 不改 autoGrant / accounting 流程
+
+## 人工核准規則
+
+Group B 一律先分析，不直接施工。
+
+只有在以下條件同時滿足時，才建議進入 implementation issue：
+1. 已完成對應分析文件
+2. 已標出 SQLite-safe 邊界
+3. 已確認不會默默擴大到 Ask AI / batchUpload / exam / credits schema remediation
+4. 使用者明確人工核准
+
+## 建議後續順序
+
+1. 先完成 B1 PDF annotations portability analysis
+2. 再完成 B2 lesson points persistence portability analysis
+3. 最後完成 B3 credit transactions / credits tab portability analysis
+4. 三份分析都完成後，再決定是否拆 implementation issue
+
+## 結論
+
+Group B 的核心原則是：
+- 先釐清資料持久化與 SQLite baseline 的相容邊界
+- 不把「現有功能存在」誤判成「可以安全導入」
+- 沒有分析結論與人工核准前，不進行任何實作
